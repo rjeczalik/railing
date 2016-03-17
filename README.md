@@ -8,7 +8,7 @@ around url.Values. For details look at the example or GoDoc.
 Installation
 ------------
 
-  go get github.com/jszwec/railing
+    go get github.com/jszwec/railing
 
 
 Example
