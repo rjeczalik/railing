@@ -11,7 +11,7 @@ import (
 var marshalerType = reflect.TypeOf(new(Marshaler)).Elem()
 
 // Marshaler is the interface implemented by objects that can marshal themselves
-// into url.Values.
+// into Values.
 type Marshaler interface {
 	MarshalQuery() (Values, error)
 }
@@ -38,7 +38,7 @@ func (e *MarshalerError) Error() string {
 		": " + e.Err.Error()
 }
 
-// Marshal returns structs or maps encoded into url.Values with keys compatible
+// Marshal returns structs or maps encoded into Values with keys compatible
 // with rails query param style.
 //
 // To marshal a struct into values, Marshal walks every exported field and it
@@ -48,28 +48,28 @@ func (e *MarshalerError) Error() string {
 // The empty values are false, 0, any nil pointer or interface value, and any
 // array, slice, map, or string of length zero. The object's default key string
 // is the struct field name but can be specified in the struct field's tag
-// value. The "url" key in the struct field's tag value is the key name,
+// value. The "railing" key in the struct field's tag value is the key name,
 // followed by an optional comma and options. Examples:
 //
 //   // Field is ignored by this package.
-//   Field int `url:"-"`
+//   Field int `railing:"-"`
 //
 //   // Field appears in Values as key "myName".
-//   Field int `url:"myName"`
+//   Field int `railing:"myName"`
 //
 //   // Field appears in Values as key "myName" and
 //   // the field is omitted from the object if its value is empty,
 //   // as defined above.
-//   Field int `url:"myName,omitempty"`
+//   Field int `railing:"myName,omitempty"`
 //
 //   // Field appears in Values as key "Field" (the default), but
 //   // the field is skipped if empty.
 //   // Note the leading comma.
-//   Field int `url:",omitempty"`
+//   Field int `railing:",omitempty"`
 //
 //   // Field appears in Values as key "slice" - elements are joined by ','
 //   // character because of 'comma' option.
-//   Field []int `url:"slice,comma"`
+//   Field []int `railing:"slice,comma"`
 //
 // Anonymous struct fields are marshaled as if their inner exported fields were
 // fields in the outer struct. An anonymous struct field with a name given in
@@ -103,9 +103,9 @@ func (e *MarshalerError) Error() string {
 //    }
 //
 // WARNING: if you are willing to encode []interface{} value then keep in mind
-// that in order to be encoded correctly it will be able to contain only
-// primitive types. If a struct or a map will be used as an element then the
-// error will be returned.
+// that in order to be encoded correctly it should contain only primitive types.
+// If a struct or a map will be used as an element then the error will be
+// returned.
 func Marshal(v interface{}) (Values, error) {
 	m, err := (&encoder{}).marshal(reflect.ValueOf(v))
 	if err != nil {

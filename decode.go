@@ -44,7 +44,7 @@ func (e *InvalidUnmarshalError) Error() string {
 }
 
 // Unmarshaler is the interface implemented by objects that can unmarshal
-// an url.Values description of themselves. The input contains keys and values
+// a Values description of themselves. The input contains keys and values
 // for the current object. If the object is a nested one and the original map
 // contains eg. "foo[name]" then the input will contain stripped keys - in this
 // case - "name".
@@ -52,10 +52,10 @@ type Unmarshaler interface {
 	UnmarshalQuery(Values) error
 }
 
-// Unmarshal parses the url.Value data and stores the result
-// in the value pointed to by v.
+// Unmarshal parses Values data and stores the result in the value pointed to by
+// v.
 //
-// Unmarshal supports the url.Values which were created from parsing the rails
+// Unmarshal supports the Values which were created from parsing the rails
 // style query params.
 //
 // Unmarshal can be used to unmarshal the data into structs and maps.
