@@ -14,7 +14,7 @@ Installation
 Example
 -----
 
-```
+```go
 package main
 
 import (
@@ -86,7 +86,7 @@ func main() {
   // Colors[][ID]=1&Colors[][Name]=red&Colors[][RGB][B]=0&Colors[][RGB][G]=0&Colors[][RGB][R]=255&Colors[][ID]=2&Colors[][Name]=blue&Colors[][RGB][B]=255&Colors[][RGB][G]=0&Colors[][RGB][R]=0
   // {[{1 red {255 0 0}} {2 blue {0 0 255}}]}
 }
-```go
+```
 
 Bugs
 -----
