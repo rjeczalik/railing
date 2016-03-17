@@ -1,0 +1,19 @@
+language: go
+
+go:
+ - 1.4.3
+ - 1.5.3
+ - 1.6
+
+os:
+ - linux
+ - osx
+
+install:
+ - go get golang.org/x/tools/cmd/vet
+ - go get -t -v ./...
+
+script:
+ - go tool vet -all .
+ - go install ./...
+ - go test -v ./...
