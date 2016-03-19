@@ -213,7 +213,7 @@ func TestMarshal(t *testing.T) {
 		// 15
 		{
 			in: map[string][]int{
-				"ints": []int{1, 2, 3},
+				"ints": {1, 2, 3},
 			},
 			out: url.Values{
 				"ints[]": []string{"1", "2", "3"},
@@ -239,8 +239,8 @@ func TestMarshal(t *testing.T) {
 					"slice": []int{1, 2},
 				},
 				"foo":        []interface{}{1, 2, "foo"},
-				"marshaler":  []joinedStr{joinedStr{"1,2"}, joinedStr{"a,b"}},
-				"marshalerp": []*joinedStr{&joinedStr{"1,2"}, &joinedStr{"a,b"}},
+				"marshaler":  []joinedStr{{"1,2"}, {"a,b"}},
+				"marshalerp": []*joinedStr{{"1,2"}, {"a,b"}},
 			},
 			out: url.Values{
 				"key":               []string{"value"},
@@ -266,7 +266,7 @@ func TestMarshal(t *testing.T) {
 		// 20
 		{
 			in: map[string][]*int{
-				"ints":  []*int{nilIntPointer, pint(1)},
+				"ints":  {nilIntPointer, pint(1)},
 				"nil[]": nil,
 			},
 			out: url.Values{"ints[]": []string{"1"}},

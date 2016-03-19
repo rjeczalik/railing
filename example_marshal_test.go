@@ -41,8 +41,8 @@ func ExampleMarshal() {
 
 func ExampleMarshal_maps() {
 	intMap := map[string][]int{
-		"first_array":  []int{1, 2},
-		"second_array": []int{3, 4},
+		"first_array":  {1, 2},
+		"second_array": {3, 4},
 	}
 
 	v, err := railing.Marshal(intMap)

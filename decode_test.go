@@ -356,7 +356,7 @@ func TestUnmarshal(t *testing.T) {
 		{
 			in:  url.Values{"ids[]": []string{"1", "2", "3"}},
 			ptr: new(map[string][]int),
-			out: map[string][]int{"ids": []int{1, 2, 3}},
+			out: map[string][]int{"ids": {1, 2, 3}},
 		},
 		// 18
 		{
@@ -419,7 +419,7 @@ func TestUnmarshal(t *testing.T) {
 				"lol": []string{"lol"},
 			},
 			ptr: new(M),
-			out: M{I: 1, Map: map[string][]string{"lol": []string{"lol"}}},
+			out: M{I: 1, Map: map[string][]string{"lol": {"lol"}}},
 		},
 		// 23
 		{
