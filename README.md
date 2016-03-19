@@ -55,7 +55,7 @@ func main() {
 		},
 	}
 
-	v, err := railing.Marshal(&cm)
+	v, err := railing.Marshal(cm)
 	if err != nil {
 		log.Fatal(err)
 	}
