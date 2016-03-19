@@ -1,7 +1,8 @@
 railing [![GoDoc](https://godoc.org/github.com/jszwec/railing?status.svg)](http://godoc.org/github.com/jszwec/railing) [![Build Status](https://travis-ci.org/jszwec/railing.svg?branch=master)](https://travis-ci.org/jszwec/railing)
 ============
 
-Package railing implements encoding and decoding rails style query parameters.
+Package railing implements encoding and decoding rails style query parameters -
+http://guides.rubyonrails.org/action_controller_overview.html#hash-and-array-parameters.
 Marshal and Unmarshal functions are based on the Values type which is a wrapper
 around url.Values. For details look at the example or GoDoc.
 
@@ -14,78 +15,67 @@ Installation
 Example
 -----
 
+Lets assume we use rails and we have a following controller. Create method
+will just print out params hash.
+
+```ruby
+class ColorMapsController < ApplicationController
+  def create
+    render plain: params.except(:controller, :action).inspect
+  end
+end
+```
+
+Now lets run this little Go program.
+
 ```go
 package main
 
 import (
-  "fmt"
-  "log"
-  "net/url"
+	"fmt"
+	"image/color"
+	"io/ioutil"
+	"log"
+	"net/http"
 
-  "github.com/jszwec/railing"
+	"github.com/jszwec/railing"
 )
 
-type RGB struct {
-  R uint8
-  G uint8
-  B uint8
-}
-
-type Color struct {
-  ID   int
-  Name string
-  RGB  RGB
-}
-
-type Colors struct {
-  Colors []Color
+type ColorMap struct {
+	ID      int
+	Palette []color.RGBA
 }
 
 func main() {
-  red := Color{
-    ID:   1,
-    Name: "red",
-    RGB:  RGB{255, 0, 0},
-  }
+	cm := &ColorMap{
+		ID: 1,
+		Palette: []color.RGBA{
+			{255, 0, 0, 0},
+			{0, 255, 0, 0},
+		},
+	}
 
-  blue := Color{
-    ID:   2,
-    Name: "blue",
-    RGB:  RGB{0, 0, 255},
-  }
+	v, err := railing.Marshal(&cm)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  colors := Colors{[]Color{red, blue}}
+	resp, err := http.Post("http://127.0.0.1:3000/color_maps?"+v.Encode(), "", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
 
-  // Marshal colors.
-  values, err := railing.Marshal(&colors)
-  if err != nil {
-    log.Fatal(err)
-  }
-
-  // Print unescaped created query string.
-  str, err := url.QueryUnescape(values.Encode())
-  if err != nil {
-    log.Fatal(err)
-  }
-  fmt.Println(str)
-
-  // Parse Query to create url.Values.
-  urlValues, err := url.ParseQuery(values.Encode())
-  if err != nil {
-    log.Fatal(err)
-  }
-
-  // Unmarshal Values to newColors var.
-  var newColors Colors
-  if err := railing.Unmarshal(railing.Values{Values: urlValues},
-    &newColors); err != nil {
-    log.Fatal(err)
-  }
-  fmt.Println(newColors)
-  // Output:
-  // Colors[][ID]=1&Colors[][Name]=red&Colors[][RGB][B]=0&Colors[][RGB][G]=0&Colors[][RGB][R]=255&Colors[][ID]=2&Colors[][Name]=blue&Colors[][RGB][B]=255&Colors[][RGB][G]=0&Colors[][RGB][R]=0
-  // {[{1 red {255 0 0}} {2 blue {0 0 255}}]}
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%s", b)
 }
+```
+
+```
+{"ID"=>"1", "Palette"=>[{"A"=>"0", "B"=>"0", "G"=>"0", "R"=>"255"}, {"A"=>"0", "B"=>"0", "G"=>"255", "R"=>"0"}]}
 ```
 
 Bugs

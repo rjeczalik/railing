@@ -322,7 +322,7 @@ func (d *decoder) indexedObject(m url.Values, v reflect.Value) error {
 
 // sliceObject is used to unmarshal an array of structs. It returns a slice of
 // structs filled with the data from m. First it iterates m to check if every
-// value is of the same length. It is neccessary that the data is complete and
+// value is of the same length. It is necessary that the data is complete and
 // every key contains the same data. We divide the data in the map by index.
 //
 // For example - m[key1][0] and m[key2][0] describe the same struct, m[key1][1]
@@ -379,7 +379,7 @@ func (d *decoder) sliceObject(m url.Values,
 // the new map.
 //
 // If the key matches the tag and its not a nested struct then a normal
-// convertion can be used.
+// conversion can be used.
 //
 // If the type implements Unmarshaler interface then UnmarshalQuery will be
 // used instead of conv function.
