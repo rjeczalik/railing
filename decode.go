@@ -215,13 +215,9 @@ func (d *decoder) conv(value []string, v reflect.Value) error {
 			return &UnmarshalTypeError{"object", v.Type()}
 		}
 	case reflect.Slice:
-		if err := d.slice(value, v); err != nil {
-			return err
-		}
+		return d.slice(value, v)
 	case reflect.Array:
-		if err := d.array(value, v); err != nil {
-			return err
-		}
+		return d.array(value, v)
 	case reflect.String:
 		if len(value) >= 1 {
 			v.SetString(value[0])

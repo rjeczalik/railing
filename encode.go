@@ -171,54 +171,65 @@ func (e *encoder) object(values url.Values, v reflect.Value) error {
 			continue
 		}
 		tag := parseTag(typ)
-		if tag.ignore {
-			continue
-		}
-		if tag.omitEmpty && isEmptyValue(v.Field(i)) {
+		if tag.ignore || tag.omitEmpty && isEmptyValue(v.Field(i)) {
 			continue
 		}
 		if typ.Anonymous && tag.empty {
-			s, err := e.marshal(v.Field(i))
-			if err != nil {
+			if err := e.marshalEmbedded(values, v.Field(i)); err != nil {
 				return err
-			}
-			for k, v := range s {
-				if _, ok := values[k]; !ok {
-					values[k] = v
-				}
 			}
 			continue
 		}
-		vField := v.Field(i)
-		v := e.indirect(vField)
-		if !v.IsValid() {
-			continue
+		if err := e.marshalField(values, v.Field(i), tag); err != nil {
+			return err
 		}
-		if m := e.marshaler(v); m != nil {
-			subm, err := m.MarshalQuery()
-			if err != nil {
-				return &MarshalerError{v.Type(), err}
-			}
-			e.mergeByKey(tag.name, subm.Values, values)
-			continue
+	}
+	return nil
+}
+
+func (e *encoder) marshalField(values url.Values, v reflect.Value,
+	tag tag) error {
+	v = e.indirect(v)
+	if !v.IsValid() {
+		return nil
+	}
+	if m := e.marshaler(v); m != nil {
+		subm, err := m.MarshalQuery()
+		if err != nil {
+			return &MarshalerError{v.Type(), err}
 		}
-		switch v.Kind() {
-		case reflect.Slice, reflect.Array:
-			if err := e.slices(tag, values, v); err != nil {
-				return err
-			}
-		case reflect.Struct:
-			s, err := e.marshal(v)
-			if err != nil {
-				return err
-			}
-			e.mergeByKey(tag.name, s, values)
-		default:
-			str, err := e.conv(v)
-			if err != nil {
-				return err
-			}
-			values[tag.name] = []string{str}
+		e.mergeByKey(tag.name, subm.Values, values)
+		return nil
+	}
+	switch v.Kind() {
+	case reflect.Slice, reflect.Array:
+		if err := e.slices(tag, values, v); err != nil {
+			return err
+		}
+	case reflect.Struct:
+		s, err := e.marshal(v)
+		if err != nil {
+			return err
+		}
+		e.mergeByKey(tag.name, s, values)
+	default:
+		str, err := e.conv(v)
+		if err != nil {
+			return err
+		}
+		values.Set(tag.name, str)
+	}
+	return nil
+}
+
+func (e *encoder) marshalEmbedded(values url.Values, v reflect.Value) error {
+	s, err := e.marshal(v)
+	if err != nil {
+		return err
+	}
+	for k, v := range s {
+		if _, ok := values[k]; !ok {
+			values[k] = v
 		}
 	}
 	return nil
