@@ -21,6 +21,7 @@ func (j *joinedStr) MarshalQuery() (Values, error) {
 	return Values{url.Values{"Str": strings.Split(j.Str, ",")}}, nil
 }
 
+var nilInterface interface{}
 var nilpointer *all
 var nilIntPointer *int
 
@@ -322,6 +323,31 @@ func TestMarshal(t *testing.T) {
 			out: url.Values{
 				"slice": []string{"1,2"},
 			},
+		},
+		// 27
+		{
+			in:  nil,
+			out: make(url.Values),
+		},
+		// 28
+		{
+			in:  nilInterface,
+			out: make(url.Values),
+		},
+		//
+		// errors
+		//
+		// 29
+		{
+			in:  []string{"slice"},
+			err: &UnsupportedTypeError{reflect.TypeOf([]string{})},
+		},
+		// 30
+		{
+			in: struct {
+				Ch chan struct{}
+			}{},
+			err: &UnsupportedTypeError{reflect.TypeOf(make(chan struct{}))},
 		},
 	}
 	for i, fixture := range fixtures {
