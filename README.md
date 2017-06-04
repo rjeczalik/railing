@@ -1,4 +1,4 @@
-railing [![GoDoc](https://godoc.org/github.com/jszwec/railing?status.svg)](http://godoc.org/github.com/jszwec/railing) [![Build Status](https://travis-ci.org/jszwec/railing.svg?branch=master)](https://travis-ci.org/jszwec/railing)
+railing [![GoDoc](https://godoc.org/github.com/jszwec/railing?status.svg)](http://godoc.org/github.com/jszwec/railing) [![Build Status](https://travis-ci.org/jszwec/railing.svg?branch=master)](https://travis-ci.org/jszwec/railing) [![Go Report Card](https://goreportcard.com/badge/github.com/jszwec/railing)](https://goreportcard.com/report/github.com/jszwec/railing)
 ============
 
 Package railing implements encoding and decoding rails style query parameters -
