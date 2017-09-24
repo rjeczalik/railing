@@ -214,6 +214,7 @@ func (d *decoder) conv(value []string, v reflect.Value) error {
 		} else {
 			return &UnmarshalTypeError{"object", v.Type()}
 		}
+		return nil
 	case reflect.Slice:
 		return d.slice(value, v)
 	case reflect.Array:
@@ -222,6 +223,7 @@ func (d *decoder) conv(value []string, v reflect.Value) error {
 		if len(value) >= 1 {
 			v.SetString(value[0])
 		}
+		return nil
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		if len(value) >= 1 {
 			n, err := strconv.ParseInt(value[0], 10, 64)
@@ -230,6 +232,7 @@ func (d *decoder) conv(value []string, v reflect.Value) error {
 			}
 			v.SetInt(n)
 		}
+		return nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32,
 		reflect.Uint64:
 		if len(value) >= 1 {
@@ -239,6 +242,7 @@ func (d *decoder) conv(value []string, v reflect.Value) error {
 			}
 			v.SetUint(n)
 		}
+		return nil
 	case reflect.Float32, reflect.Float64:
 		if len(value) >= 1 {
 			n, err := strconv.ParseFloat(value[0], v.Type().Bits())
@@ -247,6 +251,7 @@ func (d *decoder) conv(value []string, v reflect.Value) error {
 			}
 			v.SetFloat(n)
 		}
+		return nil
 	case reflect.Bool:
 		if len(value) >= 1 {
 			b, err := strconv.ParseBool(value[0])
@@ -255,8 +260,9 @@ func (d *decoder) conv(value []string, v reflect.Value) error {
 			}
 			v.SetBool(b)
 		}
+		return nil
 	}
-	return nil
+	return &UnsupportedTypeError{v.Type()}
 }
 
 func (d *decoder) unmarshal(values url.Values, v reflect.Value) error {

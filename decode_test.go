@@ -1,6 +1,7 @@
 package railing
 
 import (
+	"database/sql"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -121,6 +122,10 @@ type foo struct {
 	Name    string   `railing:"name"`
 	Pointer pointer  `railing:"pointer"`
 	Slice   sliceInt `railing:"slice"`
+}
+
+type unsupportedType struct {
+	Int sql.NullInt64 `railing:"int"`
 }
 
 type sliceInt []int
@@ -486,12 +491,21 @@ func TestUnmarshal(t *testing.T) {
 		//
 		// 29
 		{
+			in: url.Values{
+				"int": []string{""},
+			},
+			ptr: new(unsupportedType),
+			out: unsupportedType{},
+			err: &UnsupportedTypeError{reflect.TypeOf(unsupportedType{}.Int)},
+		},
+		// 30
+		{
 			in:  make(url.Values),
 			ptr: new([]string),
 			out: ([]string)(nil),
 			err: &UnmarshalTypeError{"object", reflect.TypeOf([]string{})},
 		},
-		// 30
+		// 31
 		{
 			in: url.Values{
 				"foo[][id]":            []string{"1", "2"},
@@ -502,21 +516,21 @@ func TestUnmarshal(t *testing.T) {
 			out: structSlice{Foos: ([]foo)(nil)},
 			err: errMissingData(reflect.TypeOf([]foo{})),
 		},
-		// 31
+		// 32
 		{
 			in:  url.Values{"int": []string{"lol"}},
 			ptr: new(all),
 			out: all{},
 			err: &UnmarshalTypeError{"number lol", reflect.TypeOf(1)},
 		},
-		// 32
+		// 33
 		{
 			in:  url.Values{"unmarshaler": []string{"lol"}},
 			ptr: new(I),
 			out: I{},
 			err: &UnmarshalTypeError{"object", reflect.ValueOf(I{}).Field(0).Type()},
 		},
-		// 33
+		// 34
 		{
 			in:  url.Values{"unmarshaler[name]": []string{"lol"}},
 			ptr: new(I),
