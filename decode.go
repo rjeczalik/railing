@@ -164,7 +164,7 @@ func (d *decoder) maps(values url.Values, v reflect.Value) error {
 	m := reflect.MakeMap(typ)
 	for k, values := range values {
 		newVal := reflect.Indirect(reflect.New(typ.Elem()))
-		if err := d.conv(values, newVal); err != nil {
+		if err := d.conv(values, newVal, false); err != nil {
 			return err
 		}
 		m.SetMapIndex(reflect.ValueOf(strings.TrimSuffix(k, "[]")), newVal)
@@ -178,7 +178,7 @@ func (d *decoder) maps(values url.Values, v reflect.Value) error {
 func (d *decoder) slice(value []string, v reflect.Value) error {
 	slice := reflect.MakeSlice(v.Type(), len(value), len(value))
 	for i := 0; i < len(value); i++ {
-		if err := d.conv([]string{value[i]}, slice.Index(i)); err != nil {
+		if err := d.conv([]string{value[i]}, slice.Index(i), false); err != nil {
 			return err
 		}
 	}
@@ -192,7 +192,7 @@ func (d *decoder) array(value []string, v reflect.Value) error {
 	slice := reflect.MakeSlice(
 		reflect.SliceOf(v.Type().Elem()), len(value), len(value))
 	for i := 0; i < len(value); i++ {
-		if err := d.conv([]string{value[i]}, slice.Index(i)); err != nil {
+		if err := d.conv([]string{value[i]}, slice.Index(i), false); err != nil {
 			return err
 		}
 	}
@@ -201,13 +201,13 @@ func (d *decoder) array(value []string, v reflect.Value) error {
 }
 
 // conv attempts to convert a single url.Value's value to the v's type.
-func (d *decoder) conv(value []string, v reflect.Value) error {
+func (d *decoder) conv(value []string, v reflect.Value, omitempty bool) error {
 	switch v.Kind() {
 	case reflect.Ptr:
 		if v.IsNil() {
 			v.Set(reflect.New(v.Type().Elem()))
 		}
-		return d.conv(value, v.Elem())
+		return d.conv(value, v.Elem(), omitempty)
 	case reflect.Interface:
 		if v.NumMethod() == 0 {
 			v.Set(reflect.ValueOf(value))
@@ -225,7 +225,7 @@ func (d *decoder) conv(value []string, v reflect.Value) error {
 		}
 		return nil
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		if len(value) >= 1 {
+		if len(value) >= 1 && !(value[0] == "" && omitempty) {
 			n, err := strconv.ParseInt(value[0], 10, 64)
 			if err != nil || v.OverflowInt(n) {
 				return &UnmarshalTypeError{"number " + value[0], v.Type()}
@@ -235,7 +235,7 @@ func (d *decoder) conv(value []string, v reflect.Value) error {
 		return nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32,
 		reflect.Uint64:
-		if len(value) >= 1 {
+		if len(value) >= 1 && !(value[0] == "" && omitempty) {
 			n, err := strconv.ParseUint(value[0], 10, 64)
 			if err != nil || v.OverflowUint(n) {
 				return &UnmarshalTypeError{"number " + value[0], v.Type()}
@@ -244,7 +244,7 @@ func (d *decoder) conv(value []string, v reflect.Value) error {
 		}
 		return nil
 	case reflect.Float32, reflect.Float64:
-		if len(value) >= 1 {
+		if len(value) >= 1 && !(value[0] == "" && omitempty) {
 			n, err := strconv.ParseFloat(value[0], v.Type().Bits())
 			if err != nil || v.OverflowFloat(n) {
 				return &UnmarshalTypeError{"number " + value[0], v.Type()}
@@ -253,7 +253,7 @@ func (d *decoder) conv(value []string, v reflect.Value) error {
 		}
 		return nil
 	case reflect.Bool:
-		if len(value) >= 1 {
+		if len(value) >= 1 && !(value[0] == "" && omitempty) {
 			b, err := strconv.ParseBool(value[0])
 			if err != nil {
 				return &UnmarshalTypeError{"bool " + value[0], v.Type()}
@@ -425,7 +425,7 @@ func (d *decoder) object(m url.Values, v reflect.Value) (err error) {
 				if tag.comma {
 					values = d.splitValues(values, ",")
 				}
-				if err := d.conv(values, v); err != nil {
+				if err := d.conv(values, v, tag.omitEmpty); err != nil {
 					return err
 				}
 			}

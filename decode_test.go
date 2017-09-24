@@ -128,6 +128,13 @@ type unsupportedType struct {
 	Int sql.NullInt64 `railing:"int"`
 }
 
+type B struct {
+	Int   int     `railing:"int,omitempty"`
+	Uint  int     `railing:"uint,omitempty"`
+	Bool  bool    `railing:"bool,omitempty"`
+	Float float64 `railing:"float,omitempty"`
+}
+
 type sliceInt []int
 
 func (s *sliceInt) UnmarshalQuery(v Values) error {
@@ -486,10 +493,30 @@ func TestUnmarshal(t *testing.T) {
 			ptr: new(comma),
 			out: comma{Ints: []int{1, 2, 3, 4}},
 		},
+		// 29
+		{
+			in: url.Values{
+				"int":   []string{""},
+				"uint":  []string{""},
+				"bool":  []string{""},
+				"float": []string{""},
+			},
+			ptr: new(B),
+			out: B{},
+		},
+		// 30
+		{
+			in: url.Values{
+				"id": []string{""},
+			},
+			ptr: new(foo),
+			out: foo{},
+			err: &UnmarshalTypeError{Value: "number ", Type: reflect.TypeOf(1)},
+		},
 		//
 		// errors
 		//
-		// 29
+		// 31
 		{
 			in: url.Values{
 				"int": []string{""},
@@ -498,14 +525,14 @@ func TestUnmarshal(t *testing.T) {
 			out: unsupportedType{},
 			err: &UnsupportedTypeError{reflect.TypeOf(unsupportedType{}.Int)},
 		},
-		// 30
+		// 32
 		{
 			in:  make(url.Values),
 			ptr: new([]string),
 			out: ([]string)(nil),
 			err: &UnmarshalTypeError{"object", reflect.TypeOf([]string{})},
 		},
-		// 31
+		// 33
 		{
 			in: url.Values{
 				"foo[][id]":            []string{"1", "2"},
@@ -516,21 +543,21 @@ func TestUnmarshal(t *testing.T) {
 			out: structSlice{Foos: ([]foo)(nil)},
 			err: errMissingData(reflect.TypeOf([]foo{})),
 		},
-		// 32
+		// 34
 		{
 			in:  url.Values{"int": []string{"lol"}},
 			ptr: new(all),
 			out: all{},
 			err: &UnmarshalTypeError{"number lol", reflect.TypeOf(1)},
 		},
-		// 33
+		// 35
 		{
 			in:  url.Values{"unmarshaler": []string{"lol"}},
 			ptr: new(I),
 			out: I{},
 			err: &UnmarshalTypeError{"object", reflect.ValueOf(I{}).Field(0).Type()},
 		},
-		// 34
+		// 36
 		{
 			in:  url.Values{"unmarshaler[name]": []string{"lol"}},
 			ptr: new(I),
