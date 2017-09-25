@@ -225,7 +225,7 @@ func (d *decoder) conv(value []string, v reflect.Value, omitempty bool) error {
 		}
 		return nil
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		if len(value) >= 1 && !(value[0] == "" && omitempty) {
+		if len(value) >= 1 && value[0] != "" {
 			n, err := strconv.ParseInt(value[0], 10, 64)
 			if err != nil || v.OverflowInt(n) {
 				return &UnmarshalTypeError{"number " + value[0], v.Type()}
@@ -235,7 +235,7 @@ func (d *decoder) conv(value []string, v reflect.Value, omitempty bool) error {
 		return nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32,
 		reflect.Uint64:
-		if len(value) >= 1 && !(value[0] == "" && omitempty) {
+		if len(value) >= 1 && value[0] != "" {
 			n, err := strconv.ParseUint(value[0], 10, 64)
 			if err != nil || v.OverflowUint(n) {
 				return &UnmarshalTypeError{"number " + value[0], v.Type()}
